@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 def removeInvalid(x,y,z,threshold,xheight):	
 	#since a squat produces simiar motion in all 3 axes, we should get peaks on cross correlation around the same time.
@@ -65,6 +66,9 @@ def parseCSV(filepath,convert):
 	del contents[0]
 	del contents[0]
 
+	if("Time" in contents[0]):	#get rid of "pause header extra line"
+		del contents[0]
+	
 	#bin the data to x,y,z lists
 	x=[]
 	y=[]
@@ -88,7 +92,7 @@ def analysis(samplefile,convert,server=0,fname="untitled"):
 	#server flag is used to disable things that aren't necessary when running in the Flask server
 
 	#1.Load the reference data sequence. Then load the data sequence we would like to identify
-	base_x,base_y,base_z=parseCSV("base.csv",1)
+	base_x,base_y,base_z=parseCSV("jenni_reference.csv",1)
 	sq_x,sq_y,sq_z=parseCSV(samplefile,convert)
 
 	#2.Do a z score normalization for both sets
@@ -123,7 +127,6 @@ def analysis(samplefile,convert,server=0,fname="untitled"):
 		print(peaks_z[0])
 
 	#6.Time for fancy visuals!
-	import matplotlib.pyplot as plt
 	f, (ax1, ax2,ax3) = plt.subplots(3, 3,sharex=True)
 
 	#Graph reference data
@@ -170,6 +173,36 @@ def analysis(samplefile,convert,server=0,fname="untitled"):
 	return returnList
 
 
+def parseReference(filepath):
+	#read file contents
+	x,y,z=parseCSV(filepath,1)
+	print(type(x))
+	plt.plot(x)
+	plt.plot(y)
+	plt.plot(z)
+	plt.show()
+
+	indexLow=input("Enter the left side of the sample:\n")
+	indexHigh=input("Enter the right side of the sample:\n")
+	indexLow=int(indexLow)
+	indexHigh=int(indexHigh)
+
+	referenceFilename=input("Enter the name of the new reference:\n")
+	
+	x=x[indexLow:indexHigh]
+	y=y[indexLow:indexHigh]
+	z=z[indexLow:indexHigh]
+	
+
+	plt.plot(x)
+	plt.plot(y)
+	plt.plot(z)
+	plt.show()
+
+
+
+
+
 def runTests():
 	print("Running Self-Test Module:")
 	testEntries=[]
@@ -205,10 +238,11 @@ def runTests():
 if __name__ == "__main__":
 	#run this code when .py file is directly launched, i.e. not imported as a library by Flask
 
-	runTests()
+	#runTests()
+	parseReference("j_ref.csv")
 
 	#analysis("5squat.csv",1)
-	#filename="1"	
+	#filename="jenni3"	
 	#analysis("C:\\Users\\Mahela\\Downloads\\CSV\\"+filename+".csv",1)
 
 	#analysis("run.csv",0)
